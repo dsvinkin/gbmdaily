@@ -9,3 +9,7 @@ Plot the data using `plot_gbm_ctime_daily.py` and `plot_gbm_angles.py`
 
 ## Depends on
 astropy
+
+## Acknowledgments
+Code is based on Fermi GBM Orbital Background Subtraction Tool (osv_1.3)
+https://fermi.gsfc.nasa.gov/ssc/data/p7rep/analysis/user/
