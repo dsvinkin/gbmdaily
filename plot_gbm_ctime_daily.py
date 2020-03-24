@@ -179,11 +179,12 @@ def get_ebounds():
 
     return dic_e
 
-def plot_ctime(tab, date, time, det, plot_name):
+def plot_ctime(tab, date, time, det, Ti, Tf, plot_name):
 
     lst_chan = tab.colnames[4:]
     n_chan = len(lst_chan)
-    x_range = (-500, 500)
+    x_range = (Ti, Tf)
+    #x_ticks = int((Ti-Tf)/5)
 
     e_bounds = get_ebounds()
 
@@ -201,13 +202,18 @@ def plot_ctime(tab, date, time, det, plot_name):
 
 if __name__ == '__main__':
 
+    # 20190902 11370.000 s UT (03:09:30.000)
+  
     date = '20190902'
-    time = '11370.0 s UT (03:09:30.0)'
-    path = './' + date
-
+    time = '11370.000 s UT (03:09:30.000)'
+    
     lst_det = "n0 n1 n2 n3 n4 n5 n6 n7 n8 n9 na nb".split()
     resolution = '30s'
     ver = '01'
+
+    Ti, Tf = -500.0, 500.0
+
+    path = './' + date
 
     for det in lst_det:
         file_name = "glg_ctime_{:s}_{:s}_v{:s}_{:s}.txt".format(det, date[2:], ver, resolution)
@@ -216,6 +222,6 @@ if __name__ == '__main__':
         tab = Table.read(os.path.join(path, file_name), format='ascii')
         print(tab.colnames)
 
-        arr_bool = np.logical_and(tab['Ti'] >= -500.0, tab['Tf'] <= 500.0)
+        arr_bool = np.logical_and(tab['Ti'] >= Ti, tab['Tf'] <= Tf)
 
-        plot_ctime(tab[arr_bool], date, time, det, os.path.join(path, plot_name))
+        plot_ctime(tab[arr_bool], date, time, det, Ti, Tf, os.path.join(path, plot_name))

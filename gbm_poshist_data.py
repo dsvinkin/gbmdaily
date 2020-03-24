@@ -352,6 +352,7 @@ def main():
    date = '20190902'
    T0 = 11370.000 # s UT 
    ra, dec =  279.472820, +61.497984 # Transient RA Dec, deg
+   Ti, Tf = -500, 500
 
    path = './'+date
 
@@ -363,7 +364,8 @@ def main():
    timestruct = clock.parsetime(date) + datetime.timedelta(seconds=T0)
    print(clock.parsetime(date))
    print("Date and time: ", timestruct)
-   region = Regions(clock.utc2fermi(timestruct), -500, 500, ['src',])
+
+   region = Regions(clock.utc2fermi(timestruct), Ti, Tf, ['src',])
 
    data.calculate_angles(region, ra, dec)
    

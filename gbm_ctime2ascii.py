@@ -68,7 +68,7 @@ def read_pha(pha_file, gti = False, qualMask = True, tOffset = True,):
     than time & endtime.
     """
     data = fits.open(pha_file)
-    gtis = np.array((data[3].data.START,data[3].data.STOP)) 
+    gtis = np.array((data[3].data.START, data[3].data.STOP)) 
     qual = data[2].data['QUALITY']
     if qualMask:
         qual = (qual == 0)
@@ -254,9 +254,11 @@ def det2ascii(path, str_date, str_det, channel_min, channel_max, T0, resolution)
     ascii_file = "{:s}_{:s}.txt".format(out_file, str_res)
     test_ascii_file = "{:s}_test.txt".format(out_file)
 
-    t_start, t_end, t_exposure, pha_counts, gti_index, eMin, eMax = read_pha(pha_file, gti=True, qualMask=True, tOffset=False)
-    print("Emin: ", eMin)
-    print("Emax: ", eMax)
+    t_start, t_end, t_exposure, pha_counts, gti_index, eMin, eMax = read_pha(pha_file, gti=True, qualMask=True, tOffset=True)
+
+    #print("GTI: ", gti_index)
+    #print("Emin: ", eMin)
+    #print("Emax: ", eMax)
     pha_counts = pha_counts[:,channel_min-1:channel_max]
 
     #print "File {:s} contains data\nfrom {:s} to {:s}".format(pha_file, clock.fermi2utc(t_start[0]).strftime("%Y-%m-%d %H:%M:%S"), 
@@ -264,11 +266,19 @@ def det2ascii(path, str_date, str_det, channel_min, channel_max, T0, resolution)
 
     #write_acsii(ascii_file_256ms, t_start, t_end, t_exposure, pha_counts, T0=T0_GBM)
 
-    t_start, t_end, t_exposure, pha_counts = get_interval(t_start, t_end, t_exposure, pha_counts, T0, -1000.0, 1000.0 )
+    t_start, t_end, t_exposure, pha_counts = get_interval(t_start, t_end, t_exposure, pha_counts, T0, -86400.0, 86400.0 )
     #write_acsii(test_ascii_file, channel_min, channel_max, t_start, t_end, t_exposure, pha_counts)
 
     t_start_new, t_end_new, t_exposure_new, pha_counts_new = rebin(t_start, t_end, t_exposure, pha_counts, n_sum)
     write_acsii(ascii_file, channel_min, channel_max, t_start_new, t_end_new, t_exposure_new, pha_counts_new)
+
+def get_gti(pha_file, T0_met):
+    data =  fits.open(pha_file)
+    gtis = np.array((data[3].data.START, data[3].data.STOP))
+    tzero = data[2].header['TZERO4']
+    gtis = gtis + tzero
+    for i in range(0,len(gtis[0])):
+        print ("gti {:d}: {:f} {:f}".format(i, gtis[0,i]-T0_met, gtis[1,i]-T0_met))
 
 def qw(s):
     return s.split()
@@ -281,8 +291,13 @@ def main():
     Emin:  4.5 12 27  50 102 294  538  983
     Emax:   12 27 50 102 294 538  983  2000
     """
+    # 20200318 19720.000 s UT (05:28:40.000)
+    #date = '20200318'
+    #T0_GBM = 606202125.000 # Fermi seconds since 2001.0 UTC (decimal)
+
+    # 20190902 11370.000 s UT (03:09:30.000)
     date = '20190902'
-    T0_GBM = 11370.000 # s UT 
+    T0_GBM = 589086575.000 # Fermi seconds since 2001.0 UTC (decimal)
 
     path = './'+date
 
@@ -294,10 +309,14 @@ def main():
 
     channel_min = 1
     channel_max = 7
-    resolution = 30 #s
+    resolution = 10 #s
     
     for det in lst_dets:
         det2ascii(path, date[2:], det, channel_min, channel_max, T0_GBM, resolution)
 
+        #pha_file = 'glg_ctime_n{:s}_{:s}*pha'.format(det, date[2:])
+        #pha_file = glob.glob(os.path.join(path,pha_file))[0]
+        #get_gti(pha_file, T0_GBM)
 
-main()
+if __name__ == "__main__":
+    main()

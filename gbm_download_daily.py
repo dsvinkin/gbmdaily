@@ -98,7 +98,7 @@ class data_date:
 
 def main():
     
-    date = '20190902'
+    date = '20200318'
 
     path = './'+date
     
